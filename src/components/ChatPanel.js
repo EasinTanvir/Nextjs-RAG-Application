@@ -1,4 +1,4 @@
-import { Paperclip, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 
 const messages = [
