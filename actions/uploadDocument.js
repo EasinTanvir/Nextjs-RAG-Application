@@ -3,9 +3,13 @@
 import fs from "fs/promises";
 import os from "os";
 import path from "path";
+import crypto from "crypto";
 
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+
+import { getCollection } from "@/lib/chroma";
+import { genAiEmbedding } from "@/lib/genAiEmbedding";
 
 export async function uploadDocument(formData) {
   let tempFilePath = "";
@@ -21,24 +25,18 @@ export async function uploadDocument(formData) {
       throw new Error("Only PDF files are allowed.");
     }
 
-    // Convert browser File -> Buffer
     const bytes = Buffer.from(await file.arrayBuffer());
 
-    // Save temporarily
     tempFilePath = path.join(os.tmpdir(), `${Date.now()}-${file.name}`);
 
     await fs.writeFile(tempFilePath, bytes);
 
-    // Load PDF
     const loader = new PDFLoader(tempFilePath, {
       splitPages: true,
     });
 
     const docs = await loader.load();
 
-    console.log(` Loaded ${docs.length} page(s)`);
-
-    // Recursive chunking
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 500,
       chunkOverlap: 50,
@@ -47,21 +45,39 @@ export async function uploadDocument(formData) {
 
     const chunks = await splitter.splitDocuments(docs);
 
-    console.log(` Created ${chunks.length} chunks`);
+    const ids = chunks.map(() => crypto.randomUUID());
+
+    const documents = chunks.map((chunk) => chunk.pageContent);
+
+    const metadatas = chunks.map((chunk) => ({
+      source: file.name,
+      page: chunk.metadata.loc?.pageNumber ?? 1,
+    }));
+
+    const embeddings = await genAiEmbedding(documents);
+
+    console.log(`documents length ${documents.length}`);
+    console.log(`embeddings length ${embeddings.length}`);
+    console.log(`ids length ${ids.length}`);
+    console.log(`ids ${ids}`);
+
+    const collection = await getCollection();
+
+    await collection.add({
+      ids,
+      documents,
+      embeddings,
+      metadatas,
+    });
+
+    console.log("Successfully stored in Chroma");
 
     return {
       success: true,
+      message: "PDF uploaded successfully.",
       data: {
-        totalPages: docs.length,
-        totalChunks: chunks.length,
-        chunks: chunks.map((chunk, index) => ({
-          id: index + 1,
-          pageContent: chunk.pageContent,
-          metadata: {
-            source: chunk.metadata.source,
-            page: chunk.metadata.loc?.pageNumber,
-          },
-        })),
+        pages: docs.length,
+        chunks: chunks.length,
       },
     };
   } catch (error) {
@@ -70,17 +86,15 @@ export async function uploadDocument(formData) {
 
     return {
       success: false,
-      message:
-        error.message || "Something went wrong while processing the document.",
+      message: error.message || "Something went wrong.",
     };
   } finally {
-    // Delete temporary file
     if (tempFilePath) {
       try {
         await fs.unlink(tempFilePath);
         console.log("🗑️ Temporary file deleted");
       } catch (err) {
-        console.warn("⚠️ Failed to delete temporary file:", err.message);
+        console.warn("Failed to delete temporary file:", err.message);
       }
     }
   }
