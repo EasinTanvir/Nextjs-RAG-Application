@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  serverExternalPackages: ["chromadb", "@chroma-core/default-embed"],
 };
 
 export default nextConfig;
