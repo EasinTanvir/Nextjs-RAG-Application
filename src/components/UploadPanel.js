@@ -1,14 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { UploadCloud, Loader2 } from "lucide-react";
-import { uploadDocument } from "../../actions/uploadDocument";
+import { useRef } from "react";
+import { Loader2, UploadCloud } from "lucide-react";
 import toast from "react-hot-toast";
 
-export default function UploadPanel() {
-  const inputRef = useRef(null);
+import { uploadDocument } from "../../actions/uploadDocument";
 
-  const [isUploading, setIsUploading] = useState(false);
+export default function UploadPanel({
+  document,
+  setDocument,
+  isUploading,
+  setIsUploading,
+  setMessages,
+}) {
+  const inputRef = useRef(null);
 
   const handleUpload = async (file) => {
     if (!file) return;
@@ -18,14 +23,32 @@ export default function UploadPanel() {
 
       const formData = new FormData();
       formData.append("file", file);
-      console.log("file", file);
 
       const result = await uploadDocument(formData);
 
-      console.log("Upload Result:", result);
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+
+      // Save uploaded document info
+      setDocument({
+        name: file.name,
+        ...result.data,
+      });
+
+      // Start a fresh conversation
+      setMessages([
+        {
+          role: "assistant",
+          text: `✅ "${file.name}" has been uploaded successfully.\n\nThe document contains ${result.data.pages} page(s) and was split into ${result.data.chunks} chunks.\n\nYou can now ask me anything about this document.`,
+        },
+      ]);
+
+      toast.success("PDF uploaded successfully.");
     } catch (error) {
-      console.error("error message", error);
-      toast.remove(error.message || "Something went wrong.");
+      console.error(error);
+
+      toast.error(error.message || "Failed to upload PDF.");
     } finally {
       setIsUploading(false);
     }
@@ -38,12 +61,13 @@ export default function UploadPanel() {
 
     await handleUpload(file);
 
-    // Allow selecting the same file again
     e.target.value = "";
   };
 
   const handleDrop = async (e) => {
     e.preventDefault();
+
+    if (isUploading) return;
 
     const file = e.dataTransfer.files?.[0];
 
@@ -60,13 +84,20 @@ export default function UploadPanel() {
     <section className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-6">
         <p className="text-base font-semibold text-slate-900">Upload PDF</p>
+
+        {document && (
+          <p className="mt-2 text-sm text-emerald-600">
+            Current document:{" "}
+            <span className="font-medium">{document.name}</span>
+          </p>
+        )}
       </div>
 
       <input
         ref={inputRef}
         type="file"
-        accept=".pdf"
         hidden
+        accept=".pdf"
         onChange={handleFileChange}
       />
 
@@ -75,11 +106,11 @@ export default function UploadPanel() {
         onDragOver={handleDragOver}
         className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 p-8 text-center"
       >
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-slate-700 shadow-sm">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white shadow-sm">
           {isUploading ? (
-            <Loader2 className="h-7 w-7 animate-spin" />
+            <Loader2 className="h-7 w-7 animate-spin text-slate-700" />
           ) : (
-            <UploadCloud className="h-7 w-7" />
+            <UploadCloud className="h-7 w-7 text-slate-700" />
           )}
         </div>
 
@@ -100,7 +131,7 @@ export default function UploadPanel() {
           {isUploading ? "Uploading..." : "Browse files"}
         </button>
 
-        <p className="mt-6 text-sm text-slate-500">PDF · Max 5 MB</p>
+        <p className="mt-6 text-sm text-slate-500">PDF • Max 5 MB</p>
       </div>
     </section>
   );
