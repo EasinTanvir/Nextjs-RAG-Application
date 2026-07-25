@@ -2,7 +2,7 @@ import AppHeader from "@/components/AppHeader";
 import ChatPanel from "@/components/ChatPanel";
 import UploadPanel from "@/components/UploadPanel";
 
-export default function HomePage() {
+const HomePage = () => {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <AppHeader />
@@ -16,4 +16,6 @@ export default function HomePage() {
       </div>
     </main>
   );
-}
+};
+
+export default HomePage;
