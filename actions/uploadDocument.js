@@ -56,11 +56,6 @@ export async function uploadDocument(formData) {
 
     const embeddings = await genAiEmbedding(documents);
 
-    console.log(`documents length ${documents.length}`);
-    console.log(`embeddings length ${embeddings.length}`);
-    console.log(`ids length ${ids.length}`);
-    console.log(`ids ${ids}`);
-
     const collection = await getCollection();
 
     await collection.add({
@@ -69,8 +64,6 @@ export async function uploadDocument(formData) {
       embeddings,
       metadatas,
     });
-
-    console.log("Successfully stored in Chroma");
 
     return {
       success: true,

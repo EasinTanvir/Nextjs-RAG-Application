@@ -17,16 +17,9 @@ export async function genAiEmbedding(texts) {
         },
       });
 
-      console.log("response.embeddings", response.embeddings[0].values);
-      const values = response.embeddings[0].values;
-      return values;
+      return response.embeddings[0].values;
     }),
   );
 
-  console.log(
-    `Sent ${inputs.length} texts, got ${embeddings.length} embeddings`,
-  );
-
-  // Returns array of arrays matching ChromaDB format: [[...512 floats...], [...512 floats...]]
   return embeddings;
 }
