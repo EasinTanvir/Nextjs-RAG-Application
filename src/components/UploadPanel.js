@@ -144,8 +144,7 @@ export default function UploadPanel({
               <ul className="mt-3 space-y-2 text-sm text-slate-500">
                 <li>• PDF documents</li>
                 <li>• Maximum 5 MB</li>
-                <li>• Automatic indexing</li>
-                <li>• AI-powered semantic search</li>
+                <li>• Semantic search</li>
               </ul>
             </div>
           </>

@@ -203,10 +203,6 @@ export default function ChatPanel({
               )}
             </button>
           </div>
-
-          <p className="mt-3 text-center text-xs text-slate-400">
-            Press Enter to send • Shift + Enter for a new line
-          </p>
         </div>
       </div>
     </section>
