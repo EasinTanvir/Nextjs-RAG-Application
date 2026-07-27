@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { ArrowRight, FileText, Loader2, Sparkles } from "lucide-react";
 
 import MessageBubble from "./MessageBubble";
 
@@ -14,21 +14,30 @@ export default function ChatPanel({
 }) {
   const [query, setQuery] = useState("");
 
-  const bottomRef = useRef(null);
+  const messagesRef = useRef(null);
+  const textareaRef = useRef(null);
 
-  // Auto scroll
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
+    if (!messagesRef.current) return;
+
+    messagesRef.current.scrollTo({
+      top: messagesRef.current.scrollHeight,
       behavior: "smooth",
     });
   }, [messages, isThinking]);
 
+  useEffect(() => {
+    if (!textareaRef.current) return;
+
+    textareaRef.current.style.height = "0px";
+    textareaRef.current.style.height = textareaRef.current.scrollHeight + "px";
+  }, [query]);
+
   const handleSend = async () => {
     const question = query.trim();
 
-    if (!question || isThinking || !document) return;
+    if (!question || !document || isThinking) return;
 
-    // Add user message
     setMessages((prev) => [
       ...prev,
       {
@@ -66,8 +75,6 @@ export default function ChatPanel({
         },
       ]);
     } catch (error) {
-      console.error(error);
-
       setMessages((prev) => [
         ...prev,
         {
@@ -93,69 +100,113 @@ export default function ChatPanel({
   };
 
   return (
-    <section className="flex h-full min-h-[660px] flex-col rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 px-6 py-5">
-        <p className="text-base font-semibold text-slate-900">
-          Document Conversation
-        </p>
+    <section className="flex h-full w-full overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+      <div className="flex flex-1 flex-col">
+        {/* Header */}
 
-        {document && (
-          <p className="mt-1 text-sm text-slate-500">{document.name}</p>
-        )}
-      </div>
+        <div className="border-b border-slate-200 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">AI Assistant</h2>
 
-      <div className="flex-1 overflow-hidden px-6 py-5">
-        <div className="flex h-full flex-col gap-5 overflow-y-auto pr-2">
-          {messages.map((message, index) => (
-            <MessageBubble key={index} role={message.role}>
-              {message.text}
-            </MessageBubble>
-          ))}
+              <p className="mt-1 text-sm text-slate-500">
+                Ask anything about your uploaded document
+              </p>
+            </div>
 
-          {isThinking && (
-            <MessageBubble role="assistant">
-              <div className="flex items-center gap-2">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Thinking...
+            {document && (
+              <div className="hidden items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 md:flex">
+                <Sparkles className="h-4 w-4" />
+                Ready
               </div>
-            </MessageBubble>
-          )}
-
-          <div ref={bottomRef} />
-        </div>
-      </div>
-
-      <div className="border-t border-slate-200 px-6 py-4">
-        <div className="flex items-end gap-3 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <textarea
-            rows={1}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={!document || isThinking}
-            placeholder={
-              document
-                ? "Ask a question about the document..."
-                : "Upload a PDF to begin..."
-            }
-            className="max-h-40 min-h-[44px] flex-1 resize-none bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60"
-          />
-
-          <button
-            type="button"
-            disabled={!document || !query.trim() || isThinking}
-            onClick={handleSend}
-            className="inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isThinking ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                Send
-                <ArrowRight className="h-4 w-4" />
-              </>
             )}
-          </button>
+          </div>
+
+          {document && (
+            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
+              <FileText className="h-5 w-5 text-slate-500" />
+
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{document.name}</p>
+
+                <p className="text-xs text-slate-500">
+                  {document.pages} pages • {document.chunks} chunks
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Messages */}
+
+        <div ref={messagesRef} className="flex-1 overflow-y-auto px-6 py-6">
+          {!document ? (
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <FileText className="mb-6 h-12 w-12 text-slate-300" />
+
+              <h3 className="text-lg font-semibold">No document uploaded</h3>
+
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                Upload a PDF from the left panel to start chatting with your
+                documents.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-5">
+              {messages.map((message, index) => (
+                <MessageBubble key={index} role={message.role}>
+                  {message.text}
+                </MessageBubble>
+              ))}
+
+              {isThinking && (
+                <MessageBubble role="assistant">
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+
+                    <span>Thinking...</span>
+                  </div>
+                </MessageBubble>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+
+        <div className="border-t border-slate-200 p-5">
+          <div className="flex items-end gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-3">
+            <textarea
+              ref={textareaRef}
+              rows={1}
+              value={query}
+              disabled={!document || isThinking}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                document
+                  ? "Ask anything about this document..."
+                  : "Upload a PDF first..."
+              }
+              className="max-h-40 min-h-[28px] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
+            />
+
+            <button
+              onClick={handleSend}
+              disabled={!document || isThinking || !query.trim()}
+              className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isThinking ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowRight className="h-4 w-4" />
+              )}
+            </button>
+          </div>
+
+          <p className="mt-3 text-center text-xs text-slate-400">
+            Press Enter to send • Shift + Enter for a new line
+          </p>
         </div>
       </div>
     </section>
