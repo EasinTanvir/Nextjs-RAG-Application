@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+
 import { getCollection } from "@/lib/chroma";
 import { genAiEmbedding } from "@/lib/genAiEmbedding";
 import llm from "@/lib/llm";

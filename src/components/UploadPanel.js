@@ -3,7 +3,6 @@
 import { useRef } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
 import toast from "react-hot-toast";
-
 import { uploadDocument } from "../../actions/uploadDocument";
 
 export default function UploadPanel({
