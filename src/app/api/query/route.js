@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 import { getCollection } from "@/lib/chroma";
 import { genAiEmbedding } from "@/lib/genAiEmbedding";
 import llm from "@/lib/llm";
@@ -43,23 +42,64 @@ export async function POST(request) {
     // Build Context
     const context = retrievedChunks.join("\n\n---\n\n");
 
+    console.log("context", context);
+
     // Prompt
     const prompt = `
-You are a helpful AI assistant.
+You are an intelligent AI assistant that answers questions about an uploaded PDF document.
 
-Answer the user's question ONLY using the provided context.
+Your job is to answer the user's question using ONLY the provided context.
 
-If the answer cannot be found in the context, reply exactly:
+The context consists of retrieved sections from the uploaded document. These sections may not represent the entire document.
+
+## Rules
+
+1. Use ONLY the information contained in the provided context.
+2. Never invent, assume, or make up information.
+3. If the context does not contain enough information to answer the question, respond exactly with:
 
 "I couldn't find that information in the uploaded documents."
 
-Context:
+4. If the user asks for:
+   - a summary,
+   - an overview,
+   - the purpose of the document,
+   - the main topics,
+   - what the document is about,
+
+   then create the best possible summary using ONLY the provided context. Do not assume missing sections exist.
+
+5. If the user asks whether you know the document, whether you've read it, or what it contains, answer based only on the provided context.
+
+6. If the context only partially answers the question, clearly state what is supported by the context and mention that additional information was not found.
+
+7. Never mention embeddings, vector databases, chunking, retrieval systems, or internal implementation details.
+
+8. Keep answers:
+   - accurate
+   - concise
+   - well-structured
+   - easy to read
+
+9. When appropriate, use bullet points or numbered lists.
+
+10. If the answer contains names, dates, numbers, or technical details, copy them accurately from the context without modifying them.
+
+------------------------
+Context
+------------------------
+
 ${context}
 
-Question:
+------------------------
+User Question
+------------------------
+
 ${query}
 
-Answer:
+------------------------
+Answer
+------------------------
 `;
 
     // Generate Answer
