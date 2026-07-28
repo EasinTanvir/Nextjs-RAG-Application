@@ -7,7 +7,7 @@ import { getSessionId } from "@/lib/session";
 
 export async function POST(request) {
   try {
-    const { query } = await request.json();
+    const { query, history = [] } = await request.json();
 
     if (!query?.trim()) {
       return NextResponse.json(
@@ -82,18 +82,33 @@ export async function POST(request) {
         ? relevantDocuments.join("\n\n---\n\n")
         : "(no relevant document content found for this query)";
 
+    const historyText = history.length
+      ? history
+          .map(
+            (m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`,
+          )
+          .join("\n")
+      : "(no previous messages)";
+
     const prompt = `
-You are a helpful AI assistant for a document Q&A app. You can have normal conversation (greetings, thanks, small talk) naturally and warmly.
+You are a knowledgeable, friendly AI assistant for a document Q&A app. Answer naturally like a helpful expert would — clear, organized, and conversational, not robotic.
 
-For questions specifically asking about document content, facts, or information:
-- Use ONLY the provided context below.
-- If the context doesn't contain the answer, say: "I couldn't find that information in the uploaded documents."
-- Never invent facts not present in the context.
-
-For greetings, chit-chat, or general questions about your capabilities, respond naturally and conversationally — you don't need document context for these.
+Guidelines:
+- For document-related questions, use ONLY the provided context. Never invent facts.
+- If the context doesn't have the answer, say so naturally (e.g. "I don't see that covered in the document" rather than a rigid canned line).
+- For greetings, thanks, or small talk, respond warmly and naturally — no need to mention documents at all.
+- If the user asks about the earlier conversation (e.g. "what did I just ask", "what was my last question", "summarize what we discussed"), answer using the Recent Conversation section below — that's real conversation history, not document content.
+- Structure longer answers clearly: use short paragraphs, bullet points, or numbered steps when it improves readability. Keep answers concise — don't pad with fluff.
+- Preserve exact names, numbers, dates, and technical terms exactly as they appear in the context.
 
 ------------------------
-Context
+Recent Conversation
+------------------------
+
+${historyText}
+
+------------------------
+Document Context
 ------------------------
 
 ${context}

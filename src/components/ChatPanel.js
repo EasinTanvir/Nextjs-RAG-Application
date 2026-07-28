@@ -39,6 +39,12 @@ export default function ChatPanel({
 
     if (!question || !document || isThinking) return;
 
+    // capture history BEFORE adding the new message
+    const history = messages.slice(-3).map((m) => ({
+      role: m.role,
+      content: m.text,
+    }));
+
     setMessages((prev) => [
       ...prev,
       {
@@ -58,6 +64,7 @@ export default function ChatPanel({
         },
         body: JSON.stringify({
           query: question,
+          history, // <-- send last 3 messages
         }),
       });
 
@@ -116,7 +123,7 @@ export default function ChatPanel({
               </p>
               <p className="mt-1 text-sm text-slate-500">
                 Threshold Value -{" "}
-                <span className="font-semibold text-black">0.6</span>
+                <span className="font-semibold text-black">0.5</span>
               </p>
               <p className="mt-1 text-sm text-slate-500">
                 Chunk -{" "}
