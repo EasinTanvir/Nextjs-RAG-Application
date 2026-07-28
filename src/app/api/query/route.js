@@ -112,7 +112,7 @@ Answer
       sources: results.metadatas?.[0] ?? [],
     });
   } catch (error) {
-    console.error("❌ Query Error:", error);
+    console.error(" Query Error:", error);
 
     return NextResponse.json(
       {
