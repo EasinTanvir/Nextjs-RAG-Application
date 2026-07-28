@@ -87,7 +87,7 @@ export default function UploadPanel({
   return (
     <section className="flex h-full w-full flex-col rounded-2xl border border-[#262D37] bg-[#151920]">
       <div className="border-b border-[#262D37] px-5 py-4">
-        <p className="font-mono text-[11px] uppercase tracking-widest text-[#5B6472]">
+        <p className="  uppercase tracking-widest text-[#5B6472]">
           document index
         </p>
       </div>
@@ -120,10 +120,6 @@ export default function UploadPanel({
                 {isUploading ? "Indexing document" : "Drop a PDF to index"}
               </h3>
 
-              <p className="mt-2 max-w-xs font-mono text-[11px] leading-5 text-[#5B6472]">
-                recursive chunking · 500 chars · 50 overlap
-              </p>
-
               <button
                 disabled={isUploading}
                 onClick={() => inputRef.current?.click()}
@@ -139,10 +135,7 @@ export default function UploadPanel({
                 ["max size", "5 MB"],
                 ["index", "vector · cosine"],
               ].map(([label, value]) => (
-                <div
-                  key={label}
-                  className="flex justify-between font-mono text-[11px]"
-                >
+                <div key={label} className="flex justify-between ">
                   <span className="text-[#5B6472]">{label}</span>
                   <span className="text-[#8992A3]">{value}</span>
                 </div>

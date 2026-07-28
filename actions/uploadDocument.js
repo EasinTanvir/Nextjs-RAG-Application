@@ -39,8 +39,8 @@ export async function uploadDocument(formData) {
     const docs = await loader.load();
 
     const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 500,
-      chunkOverlap: 200,
+      chunkSize: 300,
+      chunkOverlap: 50,
       separators: ["\n\n", "\n", ". ", " "],
     });
 

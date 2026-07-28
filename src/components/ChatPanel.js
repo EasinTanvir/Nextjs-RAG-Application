@@ -128,17 +128,17 @@ export default function ChatPanel({
   return (
     <section className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#262D37] bg-[#151920]">
       <div className="flex items-center justify-between border-b border-[#262D37] px-5 py-4">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px] text-[#5B6472]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium text-base text-[#5B6472]">
           <span>
-            session{" "}
-            <span className="text-[#8992A3]">{sessionId?.slice(0, 8)}</span>
+            Temporary session -{" "}
+            <span className="text-[#8992A3]">{sessionId?.slice(0, 6)}</span>
           </span>
           <span>
-            threshold{" "}
+            Threshold -{" "}
             <span className="text-[#8992A3]">{THRESHOLD.toFixed(2)}</span>
           </span>
           <span className="hidden sm:inline">
-            chunking <span className="text-[#8992A3]">recursive · 500/50</span>
+            Chunk - <span className="text-[#8992A3]">Recursive Chunking</span>
           </span>
         </div>
 
@@ -156,10 +156,10 @@ export default function ChatPanel({
         {!document ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <FileText className="mb-4 h-9 w-9 text-[#262D37]" />
-            <h3 className="text-sm font-medium text-[#8992A3]">
+            <h3 className="text-lg font-medium text-[#8992A3]">
               No document indexed
             </h3>
-            <p className="mt-2 max-w-xs font-mono text-[11px] leading-5 text-[#5B6472]">
+            <p className="mt-2 max-w-xs  leading-5 text-[#5B6472]">
               upload a pdf on the left to start querying
             </p>
           </div>
