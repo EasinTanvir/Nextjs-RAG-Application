@@ -77,41 +77,20 @@ export async function POST(request) {
       }
     });
 
-    console.log("relevantDocuments", relevantDocuments);
+    const context =
+      relevantDocuments.length > 0
+        ? relevantDocuments.join("\n\n---\n\n")
+        : "(no relevant document content found for this query)";
 
-    if (relevantDocuments.length === 0) {
-      return NextResponse.json({
-        success: true,
-        answer: "I couldn't find that information in the uploaded documents.",
-        sources: [],
-      });
-    }
-
-    // Build context
-    const context = relevantDocuments.join("\n\n---\n\n");
-    console.log("context", context);
     const prompt = `
-You are an intelligent AI assistant that answers questions about an uploaded PDF document.
+You are a helpful AI assistant for a document Q&A app. You can have normal conversation (greetings, thanks, small talk) naturally and warmly.
 
-Your job is to answer the user's question using ONLY the provided context.
+For questions specifically asking about document content, facts, or information:
+- Use ONLY the provided context below.
+- If the context doesn't contain the answer, say: "I couldn't find that information in the uploaded documents."
+- Never invent facts not present in the context.
 
-The context consists of retrieved sections from the uploaded document. These sections may not represent the entire document.
-
-Rules:
-
-1. Use ONLY the provided context.
-2. Never invent information.
-3. If the answer is not supported by the context, reply exactly:
-
-"I couldn't find that information in the uploaded documents."
-
-4. If the user asks for a summary, overview, or what the document is about, summarize ONLY the provided context.
-
-5. If the context partially answers the question, explain only what is supported.
-
-6. Never mention embeddings, vector databases, chunking, retrieval systems, or internal implementation details.
-
-7. Format the answer naturally using paragraphs or bullet points when appropriate.
+For greetings, chit-chat, or general questions about your capabilities, respond naturally and conversationally — you don't need document context for these.
 
 ------------------------
 Context
@@ -124,10 +103,6 @@ User Question
 ------------------------
 
 ${query}
-
-------------------------
-Answer
-------------------------
 `;
 
     const response = await llm.invoke(prompt);
