@@ -116,8 +116,8 @@ export default function UploadPanel({
               </h3>
 
               <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                Upload a PDF and start asking questions about its contents in
-                seconds.
+                Since we are using recursive chunking, make sure you document is
+                labelled well
               </p>
 
               <button

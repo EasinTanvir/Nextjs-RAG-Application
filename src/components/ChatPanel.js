@@ -118,6 +118,12 @@ export default function ChatPanel({
                 Threshold Value -{" "}
                 <span className="font-semibold text-black">0.6</span>
               </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Chunk -{" "}
+                <span className="font-semibold text-black">
+                  Recursive Chunking
+                </span>
+              </p>
             </div>
 
             {document && (
@@ -139,8 +145,8 @@ export default function ChatPanel({
               <h3 className="text-lg font-semibold">No document uploaded</h3>
 
               <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                Upload a PDF from the left panel to start chatting with your
-                documents.
+                Since we are using recursive chunking, make sure you document is
+                labelled well
               </p>
             </div>
           ) : (
