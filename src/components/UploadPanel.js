@@ -84,15 +84,6 @@ export default function UploadPanel({
 
   return (
     <section className="flex w-full h-full flex-col rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-      {/* Header */}
-      <div className="border-b border-slate-200 px-6 py-5">
-        <h2 className="text-lg font-semibold text-slate-900">Knowledge Base</h2>
-
-        <p className="mt-1 text-sm text-slate-500">
-          Upload one PDF and chat with its contents.
-        </p>
-      </div>
-
       <div className="flex flex-1 flex-col p-6">
         <input
           ref={inputRef}
