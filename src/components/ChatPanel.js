@@ -121,20 +121,6 @@ export default function ChatPanel({
               </div>
             )}
           </div>
-
-          {document && (
-            <div className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
-              <FileText className="h-5 w-5 text-slate-500" />
-
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{document.name}</p>
-
-                <p className="text-xs text-slate-500">
-                  {document.pages} pages • {document.chunks} chunks
-                </p>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Messages */}
