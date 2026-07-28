@@ -11,6 +11,7 @@ export default function ChatPanel({
   setMessages,
   isThinking,
   setIsThinking,
+  sessionId,
 }) {
   const [query, setQuery] = useState("");
 
@@ -110,7 +111,12 @@ export default function ChatPanel({
               <h2 className="text-lg font-semibold">AI Assistant</h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Ask anything about your uploaded document
+                Temporary SessionId -{" "}
+                <span className="font-semibold text-black">{sessionId}</span>
+              </p>
+              <p className="mt-1 text-sm text-slate-500">
+                Threshold Value -{" "}
+                <span className="font-semibold text-black">0.6</span>
               </p>
             </div>
 
