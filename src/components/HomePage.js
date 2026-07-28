@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-
-import AppHeader from "@/components/AppHeader";
-import ChatPanel from "@/components/ChatPanel";
-import UploadPanel from "@/components/UploadPanel";
+import AppHeader from "./AppHeader";
+import UploadPanel from "./UploadPanel";
+import ChatPanel from "./ChatPanel";
 
 export default function HomePage({ sessionId }) {
   const [isUploading, setIsUploading] = useState(false);
@@ -20,11 +19,11 @@ export default function HomePage({ sessionId }) {
   const [isThinking, setIsThinking] = useState(false);
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-slate-50 text-slate-900">
+    <main className="flex h-screen flex-col overflow-hidden bg-[#0D1015] font-sans text-[#E7EAEE]">
       <AppHeader />
 
-      <div className="mx-auto w-full flex flex-1 overflow-auto max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row lg:gap-6">
-        <div className="w-auto max-w-[450px]">
+      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-5 overflow-auto px-4 py-5 sm:px-6 lg:flex-row lg:gap-5">
+        <div className="w-full lg:max-w-[380px]">
           <UploadPanel
             document={document}
             setDocument={setDocument}
@@ -34,7 +33,7 @@ export default function HomePage({ sessionId }) {
           />
         </div>
 
-        <div className="flex-1">
+        <div className="min-h-[520px] flex-1">
           <ChatPanel
             sessionId={sessionId}
             document={document}

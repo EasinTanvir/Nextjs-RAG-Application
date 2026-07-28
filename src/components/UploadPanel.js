@@ -1,16 +1,15 @@
 "use client";
 
 import { useRef } from "react";
-import {
-  CheckCircle2,
-  FileText,
-  Loader2,
-  RefreshCcw,
-  UploadCloud,
-} from "lucide-react";
-import toast from "react-hot-toast";
-
+import { toast } from "react-hot-toast";
 import { uploadDocument } from "../../actions/uploadDocument";
+import {
+  UploadCloud,
+  Loader2,
+  CheckCircle2,
+  RefreshCcw,
+  FileText,
+} from "lucide-react";
 
 export default function UploadPanel({
   document,
@@ -23,6 +22,16 @@ export default function UploadPanel({
 
   const handleUpload = async (file) => {
     if (!file) return;
+
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files are supported.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File exceeds the 5 MB limit.");
+      return;
+    }
 
     try {
       setIsUploading(true);
@@ -48,11 +57,11 @@ export default function UploadPanel({
       setMessages([
         {
           role: "assistant",
-          text: `Your document has been indexed successfully.\n\nYou can now ask questions, request summaries, or search for specific information.`,
+          text: `Ask me anything about this document.`,
         },
       ]);
 
-      toast.success("Document indexed successfully.");
+      toast.success("Document indexed.");
     } catch (error) {
       toast.error(error.message || "Upload failed.");
     } finally {
@@ -62,29 +71,28 @@ export default function UploadPanel({
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
-
     await handleUpload(file);
-
     e.target.value = "";
   };
 
   const handleDrop = async (e) => {
     e.preventDefault();
-
     if (isUploading) return;
-
     const file = e.dataTransfer.files?.[0];
-
     if (!file) return;
-
     await handleUpload(file);
   };
 
   return (
-    <section className="flex w-full h-full flex-col rounded-[2rem] border border-slate-200 bg-white shadow-sm">
-      <div className="flex flex-1 flex-col p-6">
+    <section className="flex h-full w-full flex-col rounded-2xl border border-[#262D37] bg-[#151920]">
+      <div className="border-b border-[#262D37] px-5 py-4">
+        <p className="font-mono text-[11px] uppercase tracking-widest text-[#5B6472]">
+          document index
+        </p>
+      </div>
+
+      <div className="flex flex-1 flex-col p-5">
         <input
           ref={inputRef}
           hidden
@@ -93,116 +101,115 @@ export default function UploadPanel({
           onChange={handleFileChange}
         />
 
-        {/* ================= Empty State ================= */}
         {!document && (
           <>
             <div
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
-              className="flex flex-1 cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-8 text-center transition hover:border-slate-400 hover:bg-slate-100"
+              className="flex flex-1 cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed border-[#262D37] bg-[#0D1015] p-8 text-center transition hover:border-[#5B8DEF]/50"
             >
-              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-sm">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#262D37] bg-[#151920]">
                 {isUploading ? (
-                  <Loader2 className="h-8 w-8 animate-spin text-slate-700" />
+                  <Loader2 className="h-5 w-5 animate-spin text-[#5B8DEF]" />
                 ) : (
-                  <UploadCloud className="h-8 w-8 text-slate-700" />
+                  <UploadCloud className="h-5 w-5 text-[#5B8DEF]" />
                 )}
               </div>
 
-              <h3 className="mt-6 text-lg font-semibold">
-                {isUploading
-                  ? "Indexing your document..."
-                  : "Drop your PDF here"}
+              <h3 className="mt-5 text-sm font-medium text-[#E7EAEE]">
+                {isUploading ? "Indexing document" : "Drop a PDF to index"}
               </h3>
 
-              <p className="mt-2 max-w-xs text-sm leading-6 text-slate-500">
-                Since we are using recursive chunking, make sure you document is
-                labelled well
+              <p className="mt-2 max-w-xs font-mono text-[11px] leading-5 text-[#5B6472]">
+                recursive chunking · 500 chars · 50 overlap
               </p>
 
               <button
                 disabled={isUploading}
                 onClick={() => inputRef.current?.click()}
-                className="mt-8 rounded-xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-6 rounded-lg bg-[#5B8DEF] px-4 py-2 text-xs font-medium text-white transition hover:bg-[#4A7CDE] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {isUploading ? "Uploading..." : "Choose PDF"}
+                {isUploading ? "Uploading…" : "Choose PDF"}
               </button>
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-medium text-slate-700">Supported</p>
-
-              <ul className="mt-3 space-y-2 text-sm text-slate-500">
-                <li>• PDF documents</li>
-                <li>• Maximum 5 MB</li>
-                <li>• Semantic search</li>
-              </ul>
+            <div className="mt-4 space-y-1.5 rounded-lg border border-[#262D37] bg-[#0D1015] px-4 py-3">
+              {[
+                ["format", "PDF"],
+                ["max size", "5 MB"],
+                ["index", "vector · cosine"],
+              ].map(([label, value]) => (
+                <div
+                  key={label}
+                  className="flex justify-between font-mono text-[11px]"
+                >
+                  <span className="text-[#5B6472]">{label}</span>
+                  <span className="text-[#8992A3]">{value}</span>
+                </div>
+              ))}
             </div>
           </>
         )}
 
-        {/* ================= Uploaded State ================= */}
-
         {document && (
           <div className="flex flex-1 flex-col">
-            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              <div className="flex items-start gap-4">
-                <div className="rounded-2xl bg-white p-3 shadow-sm">
-                  <FileText className="h-7 w-7 text-slate-700" />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-base font-semibold text-slate-900">
-                    {document.name}
-                  </h3>
-
-                  <div className="mt-2 flex items-center gap-2 text-emerald-600">
-                    <CheckCircle2 className="h-4 w-4" />
-                    <span className="text-sm font-medium">Ready for chat</span>
-                  </div>
-                </div>
+            <div className="flex items-start gap-3 rounded-xl border border-[#262D37] bg-[#0D1015] p-4">
+              <div className="rounded-lg border border-[#262D37] bg-[#151920] p-2.5">
+                <FileText className="h-5 w-5 text-[#5B8DEF]" />
               </div>
 
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-white p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">
-                    Pages
-                  </p>
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-medium text-[#E7EAEE]">
+                  {document.name}
+                </h3>
 
-                  <p className="mt-2 text-2xl font-bold">{document.pages}</p>
-                </div>
-
-                <div className="rounded-2xl bg-white p-4">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">
-                    Chunks
-                  </p>
-
-                  <p className="mt-2 text-2xl font-bold">{document.chunks}</p>
+                <div className="mt-1.5 flex items-center gap-1.5 text-[#4FC98A]">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  <span className="font-mono text-[11px] uppercase tracking-wider">
+                    indexed
+                  </span>
                 </div>
               </div>
+            </div>
 
-              <div className="mt-5 rounded-2xl bg-white p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-400">
-                  Uploaded
-                </p>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <Stat label="pages" value={document.pages} />
+              <Stat label="chunks" value={document.chunks} />
+            </div>
 
-                <p className="mt-2 text-sm text-slate-700">
-                  {document.uploadedAt}
-                </p>
-              </div>
+            <div className="mt-3 rounded-xl border border-[#262D37] bg-[#0D1015] p-4">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-[#5B6472]">
+                uploaded
+              </p>
+              <p className="mt-1.5 font-mono text-xs text-[#8992A3]">
+                {document.uploadedAt}
+              </p>
             </div>
 
             <button
               disabled={isUploading}
               onClick={() => inputRef.current?.click()}
-              className="mt-6 flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium transition hover:bg-slate-50"
+              className="mt-auto flex items-center justify-center gap-2 rounded-lg border border-[#262D37] bg-[#0D1015] px-4 py-2.5 text-xs font-medium text-[#8992A3] transition hover:border-[#5B8DEF]/50 hover:text-[#E7EAEE]"
             >
-              <RefreshCcw className="h-4 w-4" />
-              Replace Document
+              <RefreshCcw className="h-3.5 w-3.5" />
+              Replace document
             </button>
           </div>
         )}
       </div>
     </section>
+  );
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="rounded-xl border border-[#262D37] bg-[#0D1015] p-3">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-[#5B6472]">
+        {label}
+      </p>
+      <p className="mt-1.5 font-mono text-xl font-semibold text-[#E7EAEE]">
+        {value}
+      </p>
+    </div>
   );
 }
