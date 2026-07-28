@@ -9,7 +9,7 @@ const mono = IBM_Plex_Mono({
 });
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 export const metadata = {
-  title: "RAG",
+  title: "RAG Lab",
   description: "rag system",
 };
 
