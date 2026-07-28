@@ -9,7 +9,7 @@ export async function getCollection() {
     console.log("Creating Chroma collection...");
 
     collection = await chromaClient.getOrCreateCollection({
-      name: "our-pdf-rag",
+      name: "our-pdf-rag-system",
     });
 
     console.log(" Chroma collection ready");

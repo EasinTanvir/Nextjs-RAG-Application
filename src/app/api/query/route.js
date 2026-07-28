@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getCollection } from "@/lib/chroma";
 import { genAiEmbedding } from "@/lib/genAiEmbedding";
 import llm from "@/lib/llm";
+import { getSessionId } from "@/lib/session";
 
 export async function POST(request) {
   try {
@@ -14,38 +15,81 @@ export async function POST(request) {
           success: false,
           message: "Query is required.",
         },
-        { status: 400 },
+        {
+          status: 400,
+        },
       );
     }
 
-    // Generate query embedding
+    const sessionId = await getSessionId();
+
+    if (!sessionId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Session not found.",
+        },
+        {
+          status: 400,
+        },
+      );
+    }
+
+    // Generate embedding for user query
     const [queryEmbedding] = await genAiEmbedding(query);
 
-    // Search Chroma
+    // Query Chroma
     const collection = await getCollection();
 
     const results = await collection.query({
       queryEmbeddings: [queryEmbedding],
       nResults: 5,
+      where: {
+        sessionId,
+      },
+      include: ["documents", "metadatas", "distances"],
     });
 
-    const retrievedChunks = results.documents?.[0] ?? [];
+    const documents = results.documents?.[0] ?? [];
+    const metadatas = results.metadatas?.[0] ?? [];
+    const distances = results.distances?.[0] ?? [];
 
-    if (retrievedChunks.length === 0) {
+    // Debug
+    console.table(
+      documents.map((doc, index) => ({
+        distance: distances[index],
+        source: metadatas[index]?.source,
+        page: metadatas[index]?.page,
+        preview: doc.substring(0, 80),
+      })),
+    );
+
+    // Filter by similarity threshold
+    const THRESHOLD = 0.5;
+
+    const relevantDocuments = [];
+    const relevantSources = [];
+
+    documents.forEach((doc, index) => {
+      if (distances[index] <= THRESHOLD) {
+        relevantDocuments.push(doc);
+        relevantSources.push(metadatas[index]);
+      }
+    });
+
+    console.log("relevantDocuments", relevantDocuments);
+
+    if (relevantDocuments.length === 0) {
       return NextResponse.json({
         success: true,
-        answer:
-          "I couldn't find any relevant information in the uploaded documents.",
+        answer: "I couldn't find that information in the uploaded documents.",
         sources: [],
       });
     }
 
-    // Build Context
-    const context = retrievedChunks.join("\n\n---\n\n");
-
+    // Build context
+    const context = relevantDocuments.join("\n\n---\n\n");
     console.log("context", context);
-
-    // Prompt
     const prompt = `
 You are an intelligent AI assistant that answers questions about an uploaded PDF document.
 
@@ -53,38 +97,21 @@ Your job is to answer the user's question using ONLY the provided context.
 
 The context consists of retrieved sections from the uploaded document. These sections may not represent the entire document.
 
-## Rules
+Rules:
 
-1. Use ONLY the information contained in the provided context.
-2. Never invent, assume, or make up information.
-3. If the context does not contain enough information to answer the question, respond exactly with:
+1. Use ONLY the provided context.
+2. Never invent information.
+3. If the answer is not supported by the context, reply exactly:
 
 "I couldn't find that information in the uploaded documents."
 
-4. If the user asks for:
-   - a summary,
-   - an overview,
-   - the purpose of the document,
-   - the main topics,
-   - what the document is about,
+4. If the user asks for a summary, overview, or what the document is about, summarize ONLY the provided context.
 
-   then create the best possible summary using ONLY the provided context. Do not assume missing sections exist.
+5. If the context partially answers the question, explain only what is supported.
 
-5. If the user asks whether you know the document, whether you've read it, or what it contains, answer based only on the provided context.
+6. Never mention embeddings, vector databases, chunking, retrieval systems, or internal implementation details.
 
-6. If the context only partially answers the question, clearly state what is supported by the context and mention that additional information was not found.
-
-7. Never mention embeddings, vector databases, chunking, retrieval systems, or internal implementation details.
-
-8. Keep answers:
-   - accurate
-   - concise
-   - well-structured
-   - easy to read
-
-9. When appropriate, use bullet points or numbered lists.
-
-10. If the answer contains names, dates, numbers, or technical details, copy them accurately from the context without modifying them.
+7. Format the answer naturally using paragraphs or bullet points when appropriate.
 
 ------------------------
 Context
@@ -103,16 +130,15 @@ Answer
 ------------------------
 `;
 
-    // Generate Answer
     const response = await llm.invoke(prompt);
 
     return NextResponse.json({
       success: true,
       answer: response.content,
-      sources: results.metadatas?.[0] ?? [],
+      sources: relevantSources,
     });
   } catch (error) {
-    console.error(" Query Error:", error);
+    console.error("Query Error:", error);
 
     return NextResponse.json(
       {

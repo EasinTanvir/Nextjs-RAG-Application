@@ -10,10 +10,11 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 import { getCollection } from "@/lib/chroma";
 import { genAiEmbedding } from "@/lib/genAiEmbedding";
+import { getSessionId } from "@/lib/session";
 
 export async function uploadDocument(formData) {
   let tempFilePath = "";
-
+  const sessionId = await getSessionId();
   try {
     const file = formData.get("file");
 
@@ -50,6 +51,7 @@ export async function uploadDocument(formData) {
     const documents = chunks.map((chunk) => chunk.pageContent);
 
     const metadatas = chunks.map((chunk) => ({
+      sessionId,
       source: file.name,
       page: chunk.metadata.loc?.pageNumber ?? 1,
     }));
