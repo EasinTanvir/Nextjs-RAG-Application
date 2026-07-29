@@ -12,6 +12,8 @@ import { getCollection } from "@/lib/chroma";
 import { genAiEmbedding } from "@/lib/genAiEmbedding";
 import { getSessionId } from "@/lib/session";
 
+const MAX_PAGES = 3;
+
 export async function uploadDocument(formData) {
   let tempFilePath = "";
   const sessionId = await getSessionId();
@@ -38,6 +40,12 @@ export async function uploadDocument(formData) {
 
     const docs = await loader.load();
 
+    if (docs.length > MAX_PAGES) {
+      throw new Error(
+        `PDF has ${docs.length} pages. Maximum allowed is ${MAX_PAGES} pages.`,
+      );
+    }
+
     const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 300,
       chunkOverlap: 50,
@@ -45,12 +53,15 @@ export async function uploadDocument(formData) {
     });
 
     const chunks = await splitter.splitDocuments(docs);
+    const validChunks = chunks.filter(
+      (chunk) => chunk.pageContent && chunk.pageContent.trim().length > 0,
+    );
 
-    const ids = chunks.map(() => crypto.randomUUID());
+    const ids = validChunks.map(() => crypto.randomUUID());
 
-    const documents = chunks.map((chunk) => chunk.pageContent);
+    const documents = validChunks.map((chunk) => chunk.pageContent);
 
-    const metadatas = chunks.map((chunk) => ({
+    const metadatas = validChunks.map((chunk) => ({
       sessionId,
       source: file.name,
       page: chunk.metadata.loc?.pageNumber ?? 1,
@@ -58,25 +69,38 @@ export async function uploadDocument(formData) {
 
     const embeddings = await genAiEmbedding(documents);
 
+    if (
+      ids.length !== documents.length ||
+      documents.length !== embeddings.length ||
+      embeddings.length !== metadatas.length
+    ) {
+      throw new Error(
+        `Array length mismatch: ids=${ids.length}, documents=${documents.length}, embeddings=${embeddings.length}, metadatas=${metadatas.length}`,
+      );
+    }
+
     const collection = await getCollection();
 
-    await collection.add({
-      ids,
-      documents,
-      embeddings,
-      metadatas,
-    });
+    const ADD_BATCH_SIZE = 100;
 
+    for (let i = 0; i < ids.length; i += ADD_BATCH_SIZE) {
+      await collection.add({
+        ids: ids.slice(i, i + ADD_BATCH_SIZE),
+        documents: documents.slice(i, i + ADD_BATCH_SIZE),
+        embeddings: embeddings.slice(i, i + ADD_BATCH_SIZE),
+        metadatas: metadatas.slice(i, i + ADD_BATCH_SIZE),
+      });
+    }
     return {
       success: true,
       message: "PDF uploaded successfully.",
       data: {
         pages: docs.length,
-        chunks: chunks.length,
+        chunks: validChunks.length,
       },
     };
   } catch (error) {
-    console.error("❌ uploadDocument Error");
+    console.error("uploadDocument Error");
     console.error(error);
 
     return {
@@ -87,7 +111,7 @@ export async function uploadDocument(formData) {
     if (tempFilePath) {
       try {
         await fs.unlink(tempFilePath);
-        console.log("🗑️ Temporary file deleted");
+        console.log(" Temporary file deleted");
       } catch (err) {
         console.warn("Failed to delete temporary file:", err.message);
       }

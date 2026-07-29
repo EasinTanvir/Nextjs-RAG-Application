@@ -132,7 +132,7 @@ export default function UploadPanel({
             <div className="mt-4 space-y-1.5 rounded-lg border border-[#262D37] bg-[#0D1015] px-4 py-3">
               {[
                 ["format", "PDF"],
-                ["max size", "5 MB"],
+                ["max page", "3 Page"],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between ">
                   <span className="text-[#5B6472]">{label}</span>
