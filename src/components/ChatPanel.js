@@ -128,7 +128,7 @@ export default function ChatPanel({
   return (
     <section className="flex h-full w-full flex-col overflow-hidden rounded-2xl border border-[#262D37] bg-[#151920]">
       <div className="flex items-center justify-between border-b border-[#262D37] px-5 py-4">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium text-base text-[#5B6472]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-medium text-[15px] text-[#5B6472]">
           <span>
             Temporary session -{" "}
             <span className="text-[#8992A3]">{sessionId?.slice(0, 6)}</span>
@@ -138,13 +138,13 @@ export default function ChatPanel({
             <span className="text-[#8992A3]">{THRESHOLD.toFixed(2)}</span>
           </span>
           <span className="hidden sm:inline">
-            Chunk - <span className="text-[#8992A3]">Recursive Chunking</span>
+            Chunking Strategy -{" "}
+            <span className="text-[#8992A3]">Recursive</span>
           </span>
         </div>
 
         {document && (
           <div className="flex items-center gap-1.5 rounded-full border border-[#4FC98A]/30 bg-[#4FC98A]/10 px-3 py-1 text-[#4FC98A]">
-            <Sparkles className="h-3 w-3" />
             <span className="font-mono text-[10px] uppercase tracking-wider">
               ready
             </span>

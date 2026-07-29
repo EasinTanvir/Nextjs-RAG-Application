@@ -88,7 +88,7 @@ export default function UploadPanel({
     <section className="flex h-full w-full flex-col rounded-2xl border border-[#262D37] bg-[#151920]">
       <div className="border-b border-[#262D37] px-5 py-4">
         <p className="  uppercase tracking-widest text-[#5B6472]">
-          document index
+          Upload Document
         </p>
       </div>
 
@@ -155,28 +155,12 @@ export default function UploadPanel({
                 <h3 className="truncate text-sm font-medium text-[#E7EAEE]">
                   {document.name}
                 </h3>
-
-                <div className="mt-1.5 flex items-center gap-1.5 text-[#4FC98A]">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  <span className="font-mono text-[11px] uppercase tracking-wider">
-                    indexed
-                  </span>
-                </div>
               </div>
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-3">
               <Stat label="pages" value={document.pages} />
               <Stat label="chunks" value={document.chunks} />
-            </div>
-
-            <div className="mt-3 rounded-xl border border-[#262D37] bg-[#0D1015] p-4">
-              <p className="font-mono text-[10px] uppercase tracking-widest text-[#5B6472]">
-                uploaded
-              </p>
-              <p className="mt-1.5 font-mono text-xs text-[#8992A3]">
-                {document.uploadedAt}
-              </p>
             </div>
 
             <button
