@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, FileText, Sparkles } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import RetrievalReadout from "./RetrievalReadout";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const THRESHOLD = 0.5;
 
@@ -178,7 +180,15 @@ export default function ChatPanel({
                   ) : null
                 }
               >
-                {message.text}
+                {message.role === "assistant" ? (
+                  <div className="[&_strong]:font-semibold [&_strong]:text-[#1A1D23] [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-[#1A1D23] [&_h2]:mt-3 [&_h2]:mb-1 [&_p]:leading-relaxed [&_p]:mb-2 text-[#1A1D23]">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {message.text}
+                    </ReactMarkdown>
+                  </div>
+                ) : (
+                  message.text
+                )}
               </MessageBubble>
             ))}
 
