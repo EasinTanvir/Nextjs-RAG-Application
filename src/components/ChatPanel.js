@@ -154,7 +154,10 @@ export default function ChatPanel({
         )}
       </div>
 
-      <div ref={messagesRef} className="flex-1 overflow-y-auto px-5 py-6">
+      <div
+        ref={messagesRef}
+        className="flex-1 overflow-y-auto px-5 py-6 custom-scrollbar"
+      >
         {!document ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <FileText className="mb-4 h-9 w-9 text-[#262D37]" />
@@ -181,7 +184,7 @@ export default function ChatPanel({
                 }
               >
                 {message.role === "assistant" ? (
-                  <div className="[&_strong]:font-semibold [&_strong]:text-[#1A1D23] [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-[#1A1D23] [&_h2]:mt-3 [&_h2]:mb-1 [&_p]:leading-relaxed [&_p]:mb-2 text-[#1A1D23]">
+                  <div className="p-3 [&_strong]:font-semibold [&_strong]:text-[#1A1D23] [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-[#1A1D23] [&_h2]:mt-3 [&_h2]:mb-1 [&_p]:leading-relaxed [&_p]:mb-2 text-[#1A1D23]">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                       {message.text}
                     </ReactMarkdown>

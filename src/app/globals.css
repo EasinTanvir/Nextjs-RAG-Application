@@ -1,2 +1,25 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+/* Custom thin scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #262d37 transparent; /* Firefox: thumb track */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* thinner than browser default (~15-17px) */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #262d37;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #5b6472; /* lighter on hover, matches your muted text color */
+}
