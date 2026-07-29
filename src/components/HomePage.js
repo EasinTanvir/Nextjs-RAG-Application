@@ -1,22 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import AppHeader from "./AppHeader";
-import UploadPanel from "./UploadPanel";
 import ChatPanel from "./ChatPanel";
+import UploadPanel from "./UploadPanel";
+
+const DEFAULT_MESSAGES = [
+  {
+    role: "assistant",
+    text: "Upload a PDF and ask me anything about it. I'll answer using only the uploaded document.",
+  },
+];
 
 export default function HomePage({ sessionId }) {
   const [isUploading, setIsUploading] = useState(false);
   const [document, setDocument] = useState(null);
 
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      text: "Upload a PDF and ask me anything about it. I'll answer using only the uploaded document.",
-    },
-  ]);
+  const [messages, setMessages] = useState(DEFAULT_MESSAGES);
 
   const [isThinking, setIsThinking] = useState(false);
+
+  useEffect(() => {
+    const storedMessages = sessionStorage.getItem("rag-chat");
+
+    if (!storedMessages) return;
+
+    try {
+      setMessages(JSON.parse(storedMessages));
+    } catch (error) {
+      console.error("Failed to restore chat:", error);
+      sessionStorage.removeItem("rag-chat");
+    }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem("rag-chat", JSON.stringify(messages));
+  }, [messages]);
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-[#0D1015] font-sans text-[#E7EAEE]">

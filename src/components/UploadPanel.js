@@ -133,7 +133,6 @@ export default function UploadPanel({
               {[
                 ["format", "PDF"],
                 ["max size", "5 MB"],
-                ["index", "vector · cosine"],
               ].map(([label, value]) => (
                 <div key={label} className="flex justify-between ">
                   <span className="text-[#5B6472]">{label}</span>
