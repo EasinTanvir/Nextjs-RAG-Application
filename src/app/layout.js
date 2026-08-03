@@ -1,6 +1,7 @@
 import { IBM_Plex_Mono, Inter } from "next/font/google";
-import "./globals.css";
 import { Toaster } from "react-hot-toast";
+
+import "./globals.css";
 
 const mono = IBM_Plex_Mono({
   subsets: ["latin"],
