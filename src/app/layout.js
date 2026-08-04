@@ -1,6 +1,5 @@
-import { IBM_Plex_Mono, Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-
+import { IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
 
 const mono = IBM_Plex_Mono({
